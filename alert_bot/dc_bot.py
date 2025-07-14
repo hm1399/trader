@@ -62,7 +62,7 @@ class TokenSelect(Select):
         price = PriceInput(self.chain_id, token_address)
         await interaction.channel.send("Please set the price alert (e.g. 100.00):", view=price)
 
-
+# 到这里bot没有反应
 class PriceInput(View):
     def __init__(self, chain_id, token_address):
         super().__init__()
