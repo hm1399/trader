@@ -2,6 +2,8 @@ import requests
 import pandas as pd
 from datetime import datetime, timedelta
 import json
+from discord.ui import Select, View
+import discord
 
 # date to ms
 def datetime_to_millis(dt_str):
@@ -97,27 +99,23 @@ def get_okx_data(start_time=None, end_time=None, interval="1m", symbol="BTC-USD"
 
 
 #-----------------------------------------------------------------------------------------------------------------------------
-"""
 
-def get_dex_data(start_time=None, end_time=None, interval="1m", symbol="BTC-USD"):
+def get_dex_data(chain_id, token_address):
 
-    if end_time is None:
-        end_time= datetime.utcnow()
-        print(end_time)
-        
-    if start_time is None:
-        start_time =  end_time - timedelta(days=30)
-        print(start_time)
+    url = f"https://api.dexscreener.com/token-pairs/v1/{chain_id}/{token_address}"
+    try:
+        response = requests.get(url)
+        data = response.json()
+        if response.status_code == 200 and "data" in data:
+            price_data = data["data"]
+            if price_data:
+                return float(price_data[0]['price'])
+            else:
+                return None
+        else:
+            return None
+    except Exception as e:
+        return None
 
 
-    url = "https://api.dexscreener.com/token-profiles/latest/v1"
 
-    params = {
-        "instId": symbol,
-        "after": end_time,
-        "before": start_time,
-        "bar": interval,
-        "limit": "100"
-    }
-    return df
-"""
