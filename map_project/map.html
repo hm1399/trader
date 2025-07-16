@@ -11,6 +11,7 @@
     <h1 id = "title">Hong Kong Map</h1>
 	
 <div id = "map-container">
+	<!--地区绘制-->
 	<svg
     id = "map";
 	xmlns="http://www.w3.org/2000/svg";
@@ -111,7 +112,7 @@
 	/>
     
 
-	
+	<!--地区名称显示-->
 	<text xml:space="preserve" id="svg_1" y="191" x="110">Tuen Mun</text>
 	<text xml:space="preserve" id="svg_3" y="57" x="325">North</text>
   	<text xml:space="preserve" id="svg_3" y="140" x="458">Tai Po</text>
@@ -149,12 +150,14 @@
 	</text>
 
   	<text xml:space="preserve" id="svg_19" y="323" x="377">Eastern</text>
+
 	
 	</g>
+	
     </svg>
-    <div id="region-name"></div> <!-- 用于鼠标悬浮显示地区名称-->
-	<script src="map.js" type="text/javascript"></script>
-</div>
     
+</div>
+<div id="region-name"></div> <!-- 用于鼠标悬浮显示地区名称-->
+<script src="map.js" type="text/javascript"></script>
 </body>
 </html>

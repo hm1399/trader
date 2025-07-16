@@ -10,7 +10,7 @@
         #map-container {  
             width: 65%;
             height: 65%;
-            position:absolute; /* 允许其子元素使用绝对定位 */
+            position: fixed; /* 允许其子元素使用绝对定位 */
             margin-left: 17%;
             margin-top: 7%;
             border-color: black;
@@ -29,22 +29,18 @@
             position: absolute;
         }
 
+        /*板块颜色*/
         path{
             fill:cadetblue
         }
 
-        /* 鼠标悬浮时的高亮效果 */
-        .highlight {
-            fill:brown /* 高亮颜色 */
-        }
-
-        /* 鼠标悬浮时显示指针 */
+        /* 鼠标悬浮时高亮 */
         path:hover {
             cursor: pointer;
+            fill: brown;
         }
 
         #region-name {
-            width: 100px;
             font-size: 10px;
             font-weight: bold;
             position: absolute;
@@ -53,9 +49,11 @@
             padding: 2px 5px;
             border-radius: 2px;
             pointer-events: none; /* 确保文本框不阻挡鼠标事件 */
-            display: none;
+            display:none;
             transition: left 0.1s, top 0.1s; /* 平滑过渡 */
             text-align: center;
+            left:0;
+            top: 0;
         }
 
         text{
@@ -66,4 +64,5 @@
             text-anchor: start;
             font-size: 10px;
             fill: blue;
+            pointer-events:none;
         }
