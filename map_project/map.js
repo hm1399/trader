@@ -1,18 +1,3 @@
-/** 
-const cmap = new mapsvg.map(
-   "map-container",
-  {
-    options: {
-      source: "C:\internship\AITO\map_project\project\hong-kong.svg",
-      loadingText: "Loading map...",
-    },
-  }
-)
-const existingMap = mapsvg.get(0);
-**/
-
-
-
 
 const mapContainer = document.getElementById('map-container'); // 获取地图容器
 const textbox = document.getElementById('region-name'); //text box 容器
@@ -34,10 +19,10 @@ regions.forEach(region => {
     });
 
     region.addEventListener('mouseout', function() {
-        regionNameDisplay.style.display = 'none';     // 隐藏地区名称
+        textbox.style.display = 'none';     // 隐藏地区名称
     });
 
 });
 
 //试一下把path的路径和属性存进json然后用JavaScript逐个生成？
-//还要显示数据
+
