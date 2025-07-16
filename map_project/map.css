@@ -29,10 +29,6 @@
             position: absolute;
         }
 
-        /*板块颜色*/
-        path{
-            fill:cadetblue
-        }
 
         /* 鼠标悬浮时高亮 */
         path:hover {
@@ -44,7 +40,7 @@
             font-size: 10px;
             font-weight: bold;
             position: absolute;
-            background-color:blueviolet;
+            background-color:#6699ff;
             color: black;
             padding: 2px 5px;
             border-radius: 2px;
@@ -63,6 +59,6 @@
             font-weight: bold;
             text-anchor: start;
             font-size: 10px;
-            fill: blue;
+            fill: black;
             pointer-events:none;
         }

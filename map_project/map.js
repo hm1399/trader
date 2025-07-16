@@ -39,3 +39,5 @@ regions.forEach(region => {
 
 });
 
+//试一下把path的路径和属性存进json然后用JavaScript逐个生成？
+//还要显示数据
