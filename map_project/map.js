@@ -1,4 +1,15 @@
-
+/** 
+const cmap = new mapsvg.map(
+   "map-container",
+  {
+    options: {
+      source: "C:\internship\AITO\map_project\project\hong-kong.svg",
+      loadingText: "Loading map...",
+    },
+  }
+)
+const existingMap = mapsvg.get(0);
+**/
 
 let scale = 1;  // 当前缩放比例
 const scaleStep = 0.05; // 每次滚动的缩放步长
@@ -18,13 +29,12 @@ regions.forEach(region => {
         const regionName = this.getAttribute('name');  
         regionNameDisplay.textContent = regionName;  // 更新显示的地区名
         regionNameDisplay.style.display = 'block';    // 显示区域名称
-                
 
         // 根据鼠标位置调整文本框位置
         const mouseX = event.pageX; // 鼠标X坐标
         const mouseY = event.pageY; // 鼠标Y坐标
-                
-                
+        console.clear(); // 清除控制台
+        console.log(`X: ${event.clientX}, Y: ${event.clientY}`); 
 
         regionNameDisplay.style.left = mouseX-350 + 'px';  // 这个可以调整弹出来的文本位置，相对于鼠标位置
         regionNameDisplay.style.top = mouseY-300 + 'px';   
@@ -41,3 +51,4 @@ regions.forEach(region => {
         this.classList.remove('highlight');           // 移除高亮
     });
 });
+

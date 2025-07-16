@@ -57,3 +57,13 @@
             transition: left 0.1s, top 0.1s; /* 平滑过渡 */
             text-align: center;
         }
+
+        text{
+            transform: matrix(1 0 0 0.967204 0 3.61424);
+            stroke:#000;
+            stroke-width: 0;
+            font-weight: bold;
+            text-anchor: start;
+            font-size: 10px;
+            fill: blue;
+        }
