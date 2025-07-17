@@ -3,11 +3,12 @@
 import discord
 import asyncio
 from trade_simulation import Trader
-from discord.ui import Select, View, TextInput
+from discord.ui import Select, View, TextInput, Modal, Button
+from discord import ui
 from api import get_binance_data,get_okx_data, get_dex_data
 
 #登录开发者平台获取
-TOKEN = "MTM5MjQxOTM2MjQxMjk1MzYwMA.Ge65_e.HvnoUdPzGrFA1nUHqvlkSdKjqFli9LL-9lnouk"
+TOKEN = "MTM5MjQxOTM2MjQxMjk1MzYwMA.GXYjRE.HscgvEQSZKGz_JDXQChen0jjf1hy3kOQN7kG5k"
 # 在dc右键group title获取
 CHANNEL_ID = 1392422072143183883  
 
@@ -16,109 +17,29 @@ intents = discord.Intents.default()
 intents.message_content = True
 dc_client = discord.Client(intents=intents)
 
-# Select a chain
-class ChainSelect(Select):
-    def __init__(self):
-        options = [
-            discord.SelectOption(label="Solana", value="solana"),
-            discord.SelectOption(label="Ethereum", value="ethereum"),
-            discord.SelectOption(label="Base", value="base")
-        ]
-        super().__init__(placeholder="Select chain", options=options)
-
-    async def callback(self, interaction: discord.Interaction):
-        chain_id = self.values[0]
-        await interaction.response.send_message(f"Selected Chain: {chain_id}. Now choose the token...")
-        token_select = TokenSelect(chain_id)
-        view = TokenSelectView(token_select)
-        await interaction.channel.send("Please choose a token:", view=view)
-
-# Select a Coin
-class TokenSelect(Select):
-    def __init__(self, chain_id):
-        self.chain_id = chain_id
-        if chain_id == "solana":
-            options = [
-            discord.SelectOption(label="PEPE", value="Ey2zpSAJ5gVLfYDD5WjccbksJD3E9jPFMPaJ8wxvpump"),
-            discord.SelectOption(label="PENGU", value="2zMMhcVQEXDtdE6vsFS7S7D5oUodfJHE8vd1gnBouauv"),
-            discord.SelectOption(label="Bog", value="GnU9vh8c1MtMFS9DV1HLbXDe2Ug8EM5n54djT4Nnbonk")
-            ]
-        
-        elif chain_id == "ethereum" :
-            options = [
-            discord.SelectOption(label="KIKO", value="0xD50AD7C05D090EBe07827e7854141cFF48C27b44"),
-            discord.SelectOption(label="XING", value="0x71823B57de5898957d763D2A92A1571fCb0d6B44"),
-            discord.SelectOption(label="AP", value="0xe60e9BD04ccc0a394f1fDf29874e35a773cb07f4")
-            ]
-
-        elif chain_id == "base": 
-            options = [
-            discord.SelectOption(label="SHIB", value="0xFCa95aeb5bF44aE355806A5ad14659c940dC6BF7"),
-            discord.SelectOption(label="SKI", value="0x768BE13e1680b5ebE0024C42c896E3dB59ec0149L"),
-            discord.SelectOption(label="KTA", value="0xc0634090F2Fe6c6d75e61Be2b949464aBB498973")
-            ]
-
-        super().__init__(placeholder="Select token", options=options)
-
-    async def callback(self, interaction: discord.Interaction):
-        token_address = self.values[0]
-        await interaction.response.send_message(f"Selected Token: {token_address}. Now set your price alert...")
-        price = PriceInput(self.chain_id, token_address)
-        await interaction.channel.send("Please set the price alert (e.g. 100.00):", view=price)
-
-# 到这里bot没有反应
-class PriceInput(View):
-    def __init__(self, chain_id, token_address):
-        super().__init__()
-        self.chain_id = chain_id
-        self.token_address = token_address
+#创建一个表格让用户填写，并根据数据设置alert
+class Questionnaire(ui.Modal, title='Alert'):
+    # 创建文本输入框
+    chain = ui.TextInput(label='Select a Chain', placeholder='e.g., Ethereum')
+    coin = ui.TextInput(label='Select a Coin', placeholder='e.g., BTC')
 
     async def on_submit(self, interaction: discord.Interaction):
-        await interaction.response.send_message("请在聊天中输入价格(例如:100.00):", ephemeral=True)
-
-        def check(msg):
-            return msg.author == interaction.user and msg.channel == interaction.channel
-
-        try:
-            # 等待用户输入
-            price_message = await dc_client.wait_for("message", check=check)
-            price = float(price_message.content)
-
-            if price < 0:
-                await interaction.followup.send("无效价格！请输入正数。", ephemeral=True)
-                return
-
-            await interaction.followup.send(f"价格警报已设置为 {price}。当价格达到此阈值时，我会通知你。")
-            await self.monitor_price(price, interaction)
-        except ValueError:
-            await interaction.followup.send("无效输入！请输入一个有效的数字。", ephemeral=True)
-        except Exception as e:
-            await interaction.followup.send(f"发生错误：{str(e)}", ephemeral=True)
-
-    async def monitor_price(self, alert_price, interaction):
-        while True:
-            current_price = get_dex_data(self.chain_id, self.token_address)  
-            if current_price is not None:
-                if current_price >= alert_price:
-                    await interaction.followup.send(f"🔔 价格警报！当前价格为 {current_price}，超出你的阈值 {alert_price}。")
-                    break
-            await asyncio.sleep(60)
+        # 获取用户输入的表单数据
+        selected_chain = self.chain.value
+        selected_coin = self.coin.value
         
+        # 向用户发送感谢消息，并显示填写的内容
+        await interaction.response.send_message(
+            f'Thanks for your response! You selected:\nChain: {selected_chain}\nCoin: {selected_coin}',
+            ephemeral=True
+        )
 
-    async def monitor_price(self, alert_price, interaction):
-        while True:
-            current_price = get_dex_data(interaction.guild.id, TOKEN)  
-            if current_price is not None:
-                if current_price >= alert_price:
-                    await interaction.followup.send(f"🔔 价格警报！当前价格为 {current_price}，超出你的阈值 {alert_price}。")
-                    break
-            await asyncio.sleep(60)  
+        # 在这里根据获取的信息设置alert
 
-# 创建 TokenSelectView，确保 Select 被包含在 View 中
-class TokenSelectView(View):
-    def __init__(self, token_select: discord.ui.Select):
-        super().__init__()
-        self.add_item(token_select)
+
+
+
+
 
 # 阅读用户消息并做出回应
 @dc_client.event
@@ -142,11 +63,20 @@ async def on_message(message):
 # 修改这里----------------------------------------------------------------------------------------------------------------------------
     #type alert 设置一个警报，从dex获取实时数据
     elif message.content.lower() == "alert":
-        # 当用户输入 "设置警报" 时，展示选择链的界面
-        select = ChainSelect()
+        button = Button(label='Start Questionnaire', style=discord.ButtonStyle.primary)
+        async def button_callback(interaction: discord.Interaction):
+                modal = Questionnaire()
+                await interaction.response.send_modal(modal)  # 通过interaction发送表单
+            
+        # 将按钮与回调函数绑定
+        button.callback = button_callback
+
+        # 创建 View 并将按钮添加进去
         view = View()
-        view.add_item(select)
-        await message.channel.send("Please select the chain:", view=view)
+        view.add_item(button)
+
+        # 发送带有按钮的消息
+        await message.author.send("Click the button to fill the questionnaire:", view=view)
 #----------------------------------------------------------------------------------------------------------------------------------------
    
     elif message.content.lower() == "quit":
