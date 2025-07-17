@@ -1,11 +1,15 @@
+# For discord, 
+
 import discord
 import asyncio
 from trade_simulation import Trader
 from discord.ui import Select, View, TextInput
 from api import get_binance_data,get_okx_data, get_dex_data
 
+#登录开发者平台获取
 TOKEN = "MTM5MjQxOTM2MjQxMjk1MzYwMA.Ge65_e.HvnoUdPzGrFA1nUHqvlkSdKjqFli9LL-9lnouk"
-CHANNEL_ID = 1392422072143183883  # 整数形式
+# 在dc右键group title获取
+CHANNEL_ID = 1392422072143183883  
 
 intents = discord.Intents.default()
 # 读取消息权限
@@ -29,7 +33,7 @@ class ChainSelect(Select):
         view = TokenSelectView(token_select)
         await interaction.channel.send("Please choose a token:", view=view)
 
-# Select a token
+# Select a Coin
 class TokenSelect(Select):
     def __init__(self, chain_id):
         self.chain_id = chain_id

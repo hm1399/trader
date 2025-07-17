@@ -10,7 +10,7 @@ def datetime_to_millis(dt_str):
     dt = datetime.strptime(dt_str, "%Y-%m-%d %H:%M:%S")
     return int(dt.timestamp() * 1000)
 
-# 返回特定时间段Binance的交易数据，klines
+# 返回特定时间段Binance的交易历史数据，klines
 def get_binance_data(start_time=None, end_time=None, interval="1m", symbol="BTCUSDT"):
     # 默认时间段为最新的30天
     if not end_time:
@@ -57,7 +57,7 @@ def get_binance_data(start_time=None, end_time=None, interval="1m", symbol="BTCU
     return df
 
 #--------------------------------------------------------------------------------------------------------------
-# 返回特定时间段OKX的交易数据，klines
+# 返回特定时间段OKX的历史交易数据，klines
 
 def get_okx_data(start_time=None, end_time=None, interval="1m", symbol="BTC-USD"):
 
@@ -100,7 +100,6 @@ def get_okx_data(start_time=None, end_time=None, interval="1m", symbol="BTC-USD"
 
 #-----------------------------------------------------------------------------------------------------------------------------
 
-""""
 def get_dex_data(chain_id, token_address):
 
     url = f"https://api.dexscreener.com/token-pairs/v1/{chain_id}/{token_address}"
@@ -118,5 +117,5 @@ def get_dex_data(chain_id, token_address):
     except Exception as e:
         return None
 
-"""
+
 

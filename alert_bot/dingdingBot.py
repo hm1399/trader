@@ -36,7 +36,7 @@ def send_custom_robot_group_message(access_token, secret, msg, at_user_ids=None,
     sign = urllib.parse.quote_plus(base64.b64encode(hmac_code))
 
     url = f'https://oapi.dingtalk.com/robot/send?access_token={access_token}&timestamp={timestamp}&sign={sign}'
-
+    #对话框主体
     body = {
         "at": {
             "isAtAll": str(is_at_all).lower(),
@@ -57,8 +57,11 @@ def send_custom_robot_group_message(access_token, secret, msg, at_user_ids=None,
 def main():
     at_all= False # 是否@所有人
     send_custom_robot_group_message(
+        # token
         access_token="b4c3e18267cab65127807d9e75bb355e7e770fdb5853e0a7cf61882a0bae7157",
+        # secret 如果bot的安全设置被设置成加签
         secret="SEC15ec58e644908b4145595732b7708f70a4e90b33857a75de1c8ac2320e35340b",
+        #要发送的信息
         msg="Good Good Good",
         at_user_ids= None,
         at_mobiles= None,
