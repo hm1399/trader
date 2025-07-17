@@ -100,6 +100,7 @@ def get_okx_data(start_time=None, end_time=None, interval="1m", symbol="BTC-USD"
 
 #-----------------------------------------------------------------------------------------------------------------------------
 
+""""
 def get_dex_data(chain_id, token_address):
 
     url = f"https://api.dexscreener.com/token-pairs/v1/{chain_id}/{token_address}"
@@ -117,5 +118,5 @@ def get_dex_data(chain_id, token_address):
     except Exception as e:
         return None
 
-
+"""
 

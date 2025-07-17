@@ -1,9 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>test</title>
-    </head>
-    <body>
-        <script src="test.js" type="text/module"></script>
-    </body>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hong Kong Map</title>
+    <link rel="stylesheet" type="text/css" href="map.css">
+    
+</head>
+<body>
+    <h1 id = "title">Hong Kong Map</h1>
+	
+<div id = "map-container">
+	<!--地区绘制-->
+	<object type="image/svg+xml" data="hong-kong.svg" id="hongkong-map">
+     您的浏览器不支持 SVG。
+     
+    </object> 
+</div>
+
+<div id="region-name"></div> <!-- 用于鼠标悬浮显示地区名称-->
+<script src="test.js" type="text/javascript"></script>
+</body>
 </html>
