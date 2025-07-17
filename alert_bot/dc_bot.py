@@ -127,7 +127,7 @@ async def on_message(message):
 
     if message.author == dc_client.user:
         return
-
+     # type simulation 开始使用历史数据模拟交易（过去30天）， data from okx
     if message.content.lower() == "simulation":
 
         async def notify(message, price, position, capital, profit):
@@ -139,14 +139,16 @@ async def on_message(message):
         await trader.simulate_trades(notify)
         await channel.send("✅ 模拟交易完成。")
         
-
+# 修改这里----------------------------------------------------------------------------------------------------------------------------
+    #type alert 设置一个警报，从dex获取实时数据
     elif message.content.lower() == "alert":
         # 当用户输入 "设置警报" 时，展示选择链的界面
         select = ChainSelect()
         view = View()
         view.add_item(select)
         await message.channel.send("Please select the chain:", view=view)
-
+#----------------------------------------------------------------------------------------------------------------------------------------
+   
     elif message.content.lower() == "quit":
         await channel.send("quit the bot now.")
         await dc_client.close()
