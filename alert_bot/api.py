@@ -100,22 +100,27 @@ def get_okx_data(start_time=None, end_time=None, interval="1m", symbol="BTC-USD"
 
 #-----------------------------------------------------------------------------------------------------------------------------
 
-def get_dex_data(chain_id, token_address):
-
-    url = f"https://api.dexscreener.com/token-pairs/v1/{chain_id}/{token_address}"
+def get_dex_data(chain_id,token_address):
+    # 构建查询的URL，平台和代币名称组合在一起
+    url = f"https://api.dexscreener.com/tokens/v1/{chain_id}/{token_address}"
     try:
+        # 发送请求并获取响应
         response = requests.get(url)
-        data = response.json()
-        if response.status_code == 200 and "data" in data:
-            price_data = data["data"]
-            if price_data:
-                return float(price_data[0]['price'])
+        
+        # 如果响应成功
+        if response.status_code == 200:
+            data = response.json()  # 将响应内容转换为JSON格式
+            
+            # 提取价格信息 (priceUsd)
+            if data and isinstance(data, list):  # 如果数据是一个非空列表
+                price_usd = data[0].get('priceUsd', 'N/A')  # 获取第一个对象中的 priceUsd
+                return float(price_usd)
             else:
-                return None
+                print("No data found.")
         else:
-            return None
+            print(f"Error: Unable to fetch data (status code: {response.status_code})")
+    
     except Exception as e:
-        return None
-
+        print(f"Error occurred: {e}")
 
 
