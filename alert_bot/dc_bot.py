@@ -17,8 +17,10 @@ intents = discord.Intents.default()
 intents.message_content = True
 dc_client = discord.Client(intents=intents)
 
+#在这里添加不同的chain
 chain_id_set = ['solana','ethereum','base']
 
+#在这里添加不同代币的address，注意链平台的选择
 sol_coin_id = {'pepe':"Ey2zpSAJ5gVLfYDD5WjccbksJD3E9jPFMPaJ8wxvpump",
                'pengu':"2zMMhcVQEXDtdE6vsFS7S7D5oUodfJHE8vd1gnBouauv",
                'bog':"GnU9vh8c1MtMFS9DV1HLbXDe2Ug8EM5n54djT4Nnbonk",
@@ -146,7 +148,7 @@ class Questionnaire(ui.Modal, title='Alert'):
 async def on_ready():
     print(f"Logged in as {dc_client.user}")
     # 让用户可以开始交互
-    await dc_client.get_channel(CHANNEL_ID).send("Type '模拟交易' to start simulation, or '设置警报' to set price alert.") 
+    await dc_client.get_channel(CHANNEL_ID).send("Type 'simulation' to start simulation, or 'alert' to set price alert.") 
 
 @dc_client.event
 async def on_message(message):
