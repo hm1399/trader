@@ -1,12 +1,13 @@
-# Select a chain
-import discord
-import asyncio
-from trade_simulation import Trader
-from discord.ui import Select, View, TextInput, Modal, Button
-from discord import ui
-from api import get_binance_data,get_okx_data, get_dex_data
+import tweepy
+auth = tweepy.OAuth1UserHandler(
+    consumer_key = "S6Y9hKslNqNlD3iSyOr2TmZTu",
+    consumer_secret = "Vej8mxTJxQlNh5K75Yx33nxnXPjdxW39ezahsCJB2jwrQSo308",
+    access_token = "1943147050289500161-qzPduVhvhASsRw4r0ysFscfjWxLhFw",
+    access_token_secret = "WghvY5QVWsNqFg4tvcDDDHoKusnfFAFPGWKShcLy8lwzL"
+    
+)
 
-chain_id = "solana"
-token_address = "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump"
-data=get_dex_data(chain_id,token_address)
-print(data)
+api = tweepy.API(auth)
+public_tweets = api.home_timeline()
+for tweet in public_tweets:
+    print(tweet.text)
