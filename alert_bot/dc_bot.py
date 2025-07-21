@@ -142,7 +142,11 @@ async def on_message(message):
         # 发送带有按钮的消息
         await message.author.send("Click the button to fill the alert setting", view=view)
 #----------------------------------------------------------------------------------------------------------------------------------------
-   
+    
+
+
+
+
     elif message.content.lower() == "quit":
         await channel.send("quit the bot now.")
         await dc_client.close()

@@ -126,4 +126,56 @@ def get_dex_data(chain_id,token_address):
     except Exception as e:
         print(f"Error occurred: {e}")
 
+def get_coin_symbol(chain_id,token_address):
+    url=f"https://api.dexscreener.com/token-pairs/v1/{chain_id}/{token_address}"
+    try:
+        # 发送请求并获取响应
+        response = requests.get(url)
+        
+        # 如果响应成功
+        if response.status_code == 200:
+            data = response.json()  # 将响应内容转换为JSON格式
 
+            label = data[0].get('baseToken', 'N/A')  # 获取第一个对象中的 symbol
+            symbol = label.get('symbol', 'N/A') # 获取第一个对象中的 symbol
+            return symbol
+            
+        else:
+            print(f"Error: Unable to fetch data (status code: {response.status_code})")
+    
+    except Exception as e:
+        print(f"Error occurred: {e}")
+
+
+# get the information of the latest coin
+def get_latest_coin_info():
+    url = "https://api.dexscreener.com/token-profiles/latest/v1"
+    try:
+        # 发送请求并获取响应
+        response = requests.get(url)
+        
+        # 如果响应成功
+        if response.status_code == 200:
+            data = response.json()  # 将响应内容转换为JSON格式   
+            data=data[-1]
+            chain_id=data.get('chainId', 'N/A')
+            address = data.get('tokenAddress', 'N/A')
+            symbol = get_coin_symbol(chain_id,address)
+            data_set=[chain_id,address,symbol]
+            return data_set
+        else:
+            print(f"Error: Unable to fetch data (status code: {response.status_code})")
+    
+    except Exception as e:
+        print(f"Error occurred: {e}")
+
+
+
+data=get_latest_coin_info()
+print(data)
+            
+
+
+
+            
+            
