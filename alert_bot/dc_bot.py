@@ -6,6 +6,8 @@ from trade_simulation import Trader
 from discord.ui import Select, View, TextInput, Modal, Button
 from discord import ui
 from api import get_binance_data,get_okx_data, get_dex_data
+from database import add_data_to_chain, add_data_to_coin, get_all_chains, get_all_coins, get_coin_address, update_chain_id, update_coin_id
+
 
 #登录开发者平台获取
 TOKEN = "MTM5MjQxOTM2MjQxMjk1MzYwMA.GFKmw4.YNPtpoSmKd36LKYNXxrp708TaPscDUYwaPwu5U"
@@ -17,34 +19,8 @@ intents = discord.Intents.default()
 intents.message_content = True
 dc_client = discord.Client(intents=intents)
 
-#在这里添加不同的chain
-chain_id_set = ['solana','ethereum','base']
-
-#在这里添加不同代币的address，注意链平台的选择
-sol_coin_id = {'pepe':"Ey2zpSAJ5gVLfYDD5WjccbksJD3E9jPFMPaJ8wxvpump",
-               'pengu':"2zMMhcVQEXDtdE6vsFS7S7D5oUodfJHE8vd1gnBouauv",
-               'bog':"GnU9vh8c1MtMFS9DV1HLbXDe2Ug8EM5n54djT4Nnbonk",
-               'fartcoin':"9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump"
-               }
-
-eth_coin_id = {'kiko':"0xD50AD7C05D090EBe07827e7854141cFF48C27b44",
-               'xing':"0x71823B57de5898957d763D2A92A1571fCb0d6B44",
-               'ap':"0xe60e9BD04ccc0a394f1fDf29874e35a773cb07f4",
-               'spx':'0x52c77b0cb827afbad022e6d6caf2c44452edbc39'
-               }
-
-base_coin_id = {'shib':"0xFCa95aeb5bF44aE355806A5ad14659c940dC6BF7",
-                'ski':"0x768BE13e1680b5ebE0024C42c896E3dB59ec0149L",
-                'kta':"0xc0634090F2Fe6c6d75e61Be2b949464aBB498973",
-                'my':"0x677dB5a751fbD0b130dDc02715223d9Da4A98F8F"
-                }
-
-
 # 保存用户的警报设置（字典：用户ID -> 警报设置）
 user_alerts = {}
-
-
-
 
 #创建一个表格让用户填写，并根据数据设置alert
 class Questionnaire(ui.Modal, title='Alert'):
@@ -78,50 +54,28 @@ class Questionnaire(ui.Modal, title='Alert'):
     async def check_price(self, selected_chain, selected_coin, select_price, interaction: discord.Interaction):
         # 根据链和代币地址获取实时价格
         # 检查用户选择的chain有没有被提供
-        coin_id = None
-        print("我在1")
+        coin_address = None
         print(selected_chain)
         print(selected_coin)
-        if selected_chain.lower() not in chain_id_set:
+        selected_chain = selected_chain.upper()
+        selected_coin = selected_coin.upper()
+        # check chain is supported or not
+        if selected_chain.upper() not in get_all_chains():
             await interaction.followup.send(f"Chain {selected_chain} not supported", ephemeral=True)
             return
-        print("我在2 ")
-        if selected_chain.lower() == "solana":
-            print("我在3")
-            if selected_coin.lower() in sol_coin_id:
-                print("我在4")
-                coin_id = sol_coin_id[selected_coin.lower()]
-            # check coin is supported or not
-            else:
-                await interaction.followup.send(f"Coin {selected_coin} not found on {selected_chain}.", ephemeral=True)
-                return
+        # check coin is supported or not
+        if selected_coin in get_all_coins(selected_chain):
+            coin_address = get_coin_address(selected_coin)
+        else:
+            await interaction.followup.send(f"Coin {selected_coin} not found on {selected_chain}.", ephemeral=True)
+            return
         
-        elif selected_chain.lower() == "ethereum":
-            print("我在5") 
-            if selected_coin.lower() in eth_coin_id:
-                coin_id = eth_coin_id[selected_coin.lower()]
-            # check coin is supported or not
-            else:
-                await interaction.followup.send(f"Coin {selected_coin} not found on {selected_chain}.", ephemeral=True)
-                return
-            
-        elif selected_chain.lower() == "base":
-            if selected_coin.lower() in base_coin_id:
-                coin_id = base_coin_id[selected_coin.lower()]
-            # check coin is supported or not
-            else:
-                await interaction.followup.send(f"Coin {selected_coin} not found on {selected_chain}.", ephemeral=True)
-                return
-        #chain=selected_chain.lower() ,coin=coin_id
-
-        if coin_id is None:
+        if coin_address is None:
             await interaction.followup.send(f"Failed to fetch price for {selected_coin} on {selected_chain}.", ephemeral=True)
             return
 
-
-
         # 获取实时价格
-        price = get_dex_data(selected_chain.lower(), coin_id)
+        price = get_dex_data(selected_chain.lower(), coin_address)
 
         #获取不到价格
         if price is None:
@@ -130,7 +84,7 @@ class Questionnaire(ui.Modal, title='Alert'):
     
         
         # 检查价格是否超过设定阈值
-        if price > select_price:
+        if price >= select_price:
             await interaction.user.send(f"Alert! The price of {selected_coin} on {selected_chain} has exceeded your set price of {select_price}. Current price is {price}.")
         else:
             await interaction.user.send(f"The current price of {selected_coin} on {selected_chain} is {price}, which is below your alert threshold of {select_price}.")
