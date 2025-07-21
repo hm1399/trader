@@ -32,6 +32,24 @@ def add_data_to_coin(coin_id, address, chain_id ):
     conn.close()
     print("Data added successfully")
 
+# function of adding data to the table PROGRESS(for new coin)
+def add_data_to_progress(coin_id, address, chain_id, time, status):
+    if coin_id == None or chain_id == None or address == None or time == None or status == None:
+        print("Please enter all the required fields")
+    coin_id = coin_id.upper()
+    chain_id = chain_id.upper()
+    status = status.upper()
+    if chain_id not in get_all_chains():
+        print("Please enter a valid chain id")
+        return
+    add_data_to_coin(coin_id, address, chain_id)
+    conn = sqlite3.connect(r"C:\internship\AITO\python_project\trader\db\dex_data.db")
+    cursor.execute("INSERT INTO PROGRESS (COIN_ID, ADDRESS, CHAIN_ID, TIME, STATUS) VALUES (?,?,?,?,?)", (coin_id,address, chain_id, time, status))
+    conn.commit()
+    conn.close()
+    print("Data added successfully")
+
+
 # function of getting all the chains from the table CHAIN
 def get_all_chains():
     conn = sqlite3.connect(r"C:\internship\AITO\python_project\trader\db\dex_data.db")
@@ -73,16 +91,6 @@ def get_coin_address(coin_id):
     conn.close()
     return data[0]
 
-"""
-chain_id= "SOLANA"
-all_chains=get_all_chains()
-print(chain_id.lower())
-if chain_id.lower() in all_chains:
-    print(get_all_coins(chain_id.lower()))
-else:
-    print("no")
-
-    """
 
 # 让database里的chain_id 都变成大写
 def update_chain_id():
@@ -116,5 +124,19 @@ def update_coin_id():
     print("Data updated successfully")  
 
 
+
+
+
 #add_data_to_coin("WETH","0x4200000000000000000000000000000000000006","BASE")
 #print(get_coin_address("WETH"))
+
+#给progress表格添加两列
+conn = sqlite3.connect(r"C:\internship\AITO\python_project\trader\db\dex_data.db")
+cursor = conn.cursor()
+cursor.execute("ALTER TABLE PROGRESS ADD COLUMN TIME DATETIME NOT NULL")      
+cursor.execute("ALTER TABLE PROGRESS ADD COLUMN STATUS STRING NOT NULL")      
+
+conn.commit()
+conn.close()
+print("Data updated successfully")  
+

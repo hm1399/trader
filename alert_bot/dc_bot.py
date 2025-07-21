@@ -5,7 +5,7 @@ import asyncio
 from trade_simulation import Trader
 from discord.ui import Select, View, TextInput, Modal, Button
 from discord import ui
-from api import get_binance_data,get_okx_data, get_dex_data
+from api import get_binance_data,get_okx_data, get_coin_price
 from database import add_data_to_chain, add_data_to_coin, get_all_chains, get_all_coins, get_coin_address, update_chain_id, update_coin_id
 
 
@@ -76,7 +76,7 @@ class Questionnaire(ui.Modal, title='Alert'):
             return
 
         # 获取实时价格
-        price = get_dex_data(selected_chain.lower(), coin_address)
+        price = get_coin_price(selected_chain.lower(), coin_address)
 
         #获取不到价格
         if price is None:

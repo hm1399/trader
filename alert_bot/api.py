@@ -105,7 +105,7 @@ def get_okx_data(start_time=None, end_time=None, interval="1m", symbol="BTC-USD"
 #-----------------------------------------------------------------------------------------------------------------------------
 
 #返回价格
-def get_dex_data(chain_id,token_address):
+def get_coin_price(chain_id,token_address):
     # 构建查询的URL，平台和代币名称组合在一起
     chain_id = chain_id.lower()  # 转换为小写
     print(chain_id,token_address)
@@ -177,9 +177,42 @@ def get_latest_coin_info():
         print(f"Error occurred: {e}")
 
 
+def get_coin_liquidity(chain_id,token_address):
+    chain_id = chain_id.lower()  # 转换为小写
+    print(chain_id,token_address)
+    url = f"https://api.dexscreener.com/tokens/v1/{chain_id}/{token_address}"
+    try:
+        # 发送请求并获取响应
+        response = requests.get(url)
+        
+        # 如果响应成功
+        if response.status_code == 200:
+            data = response.json()  # 将响应内容转换为JSON格式
+            
+            # 提取价格信息 (priceUsd)
+            if data and isinstance(data, list):  # 如果数据是一个非空列表
+                liquidity = data[0].get('liquidity', 'N/A')  # 获取第一个对象中的 priceUsd
+                liquidity= liquidity.get('usd','N/A')
+                if liquidity != 'N/A':
+                    liquidity=float(liquidity)
+                return liquidity
+            else:
+                print("No data found.")
+        else:
+            print(f"Error: Unable to fetch data (status code: {response.status_code})")
+    
+    except Exception as e:
+        print(f"Error occurred: {e}")
+
 
 data=get_latest_coin_info()
-print(data)
+print(data[0])
+print(data[1])
+l=get_coin_liquidity('solana',"7BPxXTpC2JuumdcKYHrpwkL4oeo4TfCuRVEMNR41ZSRF")
+
+
+print(l)
+
             
 
 
