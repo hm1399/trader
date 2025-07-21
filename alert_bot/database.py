@@ -27,7 +27,7 @@ def add_data_to_coin(coin_id, address, chain_id ):
     
     conn = sqlite3.connect(r"C:\internship\AITO\python_project\trader\db\dex_data.db")
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO COIN (COIN_ID, ADDRESS, CHAIN_ID) VALUES (?,?)", (coin_id,address, chain_id))
+    cursor.execute("INSERT INTO COIN (COIN_ID, ADDRESS, CHAIN_ID) VALUES (?,?,?)", (coin_id,address, chain_id))
     conn.commit()
     conn.close()
     print("Data added successfully")
@@ -63,7 +63,15 @@ def get_all_coins(chin_id):
 def get_coin_address(coin_id):
     conn = sqlite3.connect(r"C:\internship\AITO\python_project\trader\db\dex_data.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT ADDRESS FROM COIN WHERE COIN_ID = ?", (coin_id))
+    cursor.execute("SELECT ADDRESS FROM COIN WHERE COIN_ID = ?", (coin_id,))
+    rows = cursor.fetchall()
+    # delete ,
+    data=[]
+    for row in rows:
+        row = list(row)
+        data.append(row[0])
+    conn.close()
+    return data[0]
 
 """
 chain_id= "SOLANA"
@@ -107,3 +115,6 @@ def update_coin_id():
     conn.close()
     print("Data updated successfully")  
 
+
+#add_data_to_coin("WETH","0x4200000000000000000000000000000000000006","BASE")
+#print(get_coin_address("WETH"))

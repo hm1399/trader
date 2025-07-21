@@ -10,7 +10,7 @@ from database import add_data_to_chain, add_data_to_coin, get_all_chains, get_al
 
 
 #登录开发者平台获取
-TOKEN = "MTM5MjQxOTM2MjQxMjk1MzYwMA.GFKmw4.YNPtpoSmKd36LKYNXxrp708TaPscDUYwaPwu5U"
+TOKEN = "MTM5MjQxOTM2MjQxMjk1MzYwMA.GTwFrx.D1SY0uECJkj8fsfIa0nuwrmjjQqaRQrlaXLuPs"
 # 在dc右键group title获取
 CHANNEL_ID = 1392422072143183883  
 #创建机器人
@@ -55,17 +55,18 @@ class Questionnaire(ui.Modal, title='Alert'):
         # 根据链和代币地址获取实时价格
         # 检查用户选择的chain有没有被提供
         coin_address = None
-        print(selected_chain)
-        print(selected_coin)
         selected_chain = selected_chain.upper()
         selected_coin = selected_coin.upper()
+        print(selected_chain)
+        print(selected_coin)
         # check chain is supported or not
-        if selected_chain.upper() not in get_all_chains():
+        if selected_chain not in get_all_chains():
             await interaction.followup.send(f"Chain {selected_chain} not supported", ephemeral=True)
             return
         # check coin is supported or not
         if selected_coin in get_all_coins(selected_chain):
             coin_address = get_coin_address(selected_coin)
+            
         else:
             await interaction.followup.send(f"Coin {selected_coin} not found on {selected_chain}.", ephemeral=True)
             return
