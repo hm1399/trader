@@ -10,6 +10,10 @@ def datetime_to_millis(dt_str):
     dt = datetime.strptime(dt_str, "%Y-%m-%d %H:%M:%S")
     return int(dt.timestamp() * 1000)
 
+def millis_to_datetime(ms): 
+    dt = datetime.fromtimestamp(ms/1000)
+    return dt.strftime("%Y-%m-%d %H:%M:%S")
+
 # 返回特定时间段Binance的交易历史数据，klines
 def get_binance_data(start_time=None, end_time=None, interval="1m", symbol="BTCUSDT"):
     # 默认时间段为最新的30天
@@ -126,7 +130,8 @@ def get_dex_data(chain_id,token_address):
     except Exception as e:
         print(f"Error occurred: {e}")
 
-def get_coin_symbol(chain_id,token_address):
+# get the symbol and the create time of the coin
+def get_coin_symbol_time(chain_id,token_address):
     url=f"https://api.dexscreener.com/token-pairs/v1/{chain_id}/{token_address}"
     try:
         # 发送请求并获取响应
@@ -138,8 +143,9 @@ def get_coin_symbol(chain_id,token_address):
 
             label = data[0].get('baseToken', 'N/A')  # 获取第一个对象中的 symbol
             symbol = label.get('symbol', 'N/A') # 获取第一个对象中的 symbol
-            return symbol
-            
+            time = data[0].get('pairCreatedAt', 'N/A')
+            time = millis_to_datetime(time)
+            return symbol,time
         else:
             print(f"Error: Unable to fetch data (status code: {response.status_code})")
     
@@ -157,11 +163,12 @@ def get_latest_coin_info():
         # 如果响应成功
         if response.status_code == 200:
             data = response.json()  # 将响应内容转换为JSON格式   
-            data=data[-1]
+            data=data[0]
             chain_id=data.get('chainId', 'N/A')
             address = data.get('tokenAddress', 'N/A')
-            symbol = get_coin_symbol(chain_id,address)
-            data_set=[chain_id,address,symbol]
+            symbol = get_coin_symbol_time(chain_id,address)[0]
+            time = get_coin_symbol_time(chain_id,address)[1]
+            data_set=[chain_id,address,symbol,time]
             return data_set
         else:
             print(f"Error: Unable to fetch data (status code: {response.status_code})")
