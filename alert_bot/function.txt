@@ -1,0 +1,44 @@
+database.py
+
+add_data_to_chain(chain_id): Add new chain to the table chain.
+
+add_data_to_coin(coin_id, address, chain_id ): Add new coin to the table coin.
+
+add_data_to_progress(coin_id, address, chain_id, time, status): Add new coin to the table add_data_to_progress, also add this coin to the table coin at the same time.
+
+get_all_chains(): Get all chains we have recorded from the table chain.
+
+get_all_coins(chain_id): Get all the name of coins base on the chain_id.
+
+get_coin_address(coin_id): Get the address of the coin base on the coin_id.
+
+update_chain_id(): Let the chain_id in table CHAIN be uppercase.
+
+update_coin_id(): Let the coin_id and chain_id in table COIN be uppercase.
+
+update_table_liquidity_status(table_name): Update the liquidity and status of tables.
+
+
+api.py
+
+datetime_to_millis(dt_str): Convert datetime string to milliseconds.
+
+millis_to_datetime(ms): Convert milliseconds to datetime string.
+
+get_binance_data(start_time=None, end_time=None, interval="1m", symbol="BTCUSDT"): get the historical data from binance.
+    return ["time", "open", "high", "low", "close", "volume",
+            "close_time", "volume_currency", "trade_count",
+            "taker_buy_base", "taker_buy_quote", "ignore"]
+
+get_okx_data(start_time=None, end_time=None, interval="1m", symbol="BTC-USD"): get the historical data from okx.
+    return ["time", "open", "high", "low", "close", "confirm"]
+
+get_coin_price(chain_id,token_address): Get the price of the coin base on the chain_id and token_address from dex api.
+
+get_coin_symbol_time(chain_id,token_address): Get the symbol and time of the coin base on the chain_id and token_address from dex api.
+
+get_latest_coin_info(): Get the latest coin information from dex api.
+    return [chain_id,address,symbol,time]
+
+get_coin_liquidity(chain_id,token_address): Get the liquidity of the coin base on the chain_id and token_address from dex api.
+

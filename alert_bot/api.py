@@ -131,7 +131,9 @@ def get_coin_price(chain_id,token_address):
         print(f"Error occurred: {e}")
 
 # get the symbol and the create time of the coin
+# result[0]=symbol, result[1]=create time
 def get_coin_symbol_time(chain_id,token_address):
+    chain_id = chain_id.lower()  # 转换为小写
     url=f"https://api.dexscreener.com/token-pairs/v1/{chain_id}/{token_address}"
     try:
         # 发送请求并获取响应
@@ -176,7 +178,7 @@ def get_latest_coin_info():
     except Exception as e:
         print(f"Error occurred: {e}")
 
-
+# reurn the liquidity and status of the coin
 def get_coin_liquidity(chain_id,token_address):
     chain_id = chain_id.lower()  # 转换为小写
     print(chain_id,token_address)
@@ -195,9 +197,11 @@ def get_coin_liquidity(chain_id,token_address):
                 liquidity= liquidity.get('usd','N/A')
                 if liquidity != 'N/A':
                     liquidity=float(liquidity)
-                return liquidity
-            else:
-                print("No data found.")
+                    status = "listed"
+                else:
+                    status = "unlisted"
+            data_set=[liquidity,status]
+            return data_set
         else:
             print(f"Error: Unable to fetch data (status code: {response.status_code})")
     
@@ -205,13 +209,7 @@ def get_coin_liquidity(chain_id,token_address):
         print(f"Error occurred: {e}")
 
 
-data=get_latest_coin_info()
-print(data[0])
-print(data[1])
-l=get_coin_liquidity('solana',"7BPxXTpC2JuumdcKYHrpwkL4oeo4TfCuRVEMNR41ZSRF")
 
-
-print(l)
 
             
 
