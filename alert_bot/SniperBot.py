@@ -156,6 +156,7 @@ class SniperBot:
 # return chain_id,address,coin_id,time,liquidity,status,price
 def get_new_coin_info():
     data_set = get_latest_coin_info() #chain_id,address,symbol,time
+    print(f"new coin data is {data_set}")
     coin_id = data_set[2]
     address = data_set[1]
     chain_id = data_set[0]
@@ -168,7 +169,7 @@ def get_new_coin_info():
 
 # return 剩余资金和买入数量
 # data=[chain_id,address,coin_id,time,liquidity,status,price]
-def buy_coin(data, capital, quantity): 
+def buy_coin(data, remainder, quantity): 
     chain_id = data[0]
     address = data[1]
     coin_id = data[2]
@@ -176,55 +177,66 @@ def buy_coin(data, capital, quantity):
     #liquidity = data[4]
     #status = data[5]
     price = data[6]
-    if capital > price:
-        quantity = int(capital/price)
-        capital -= price*quantity
-        print(f"Bought {quantity} {coin_id} at {price} with ${price*quantity} , and capital is ${capital}")
-        return [capital, quantity]
+    if remainder > price:
+        quantity = int(remainder/price)
+        remainder -= price*quantity
+        print(f"Bought {quantity} {coin_id} at {price} with ${price*quantity} , and remainder is ${remainder}")
+        return [remainder, quantity]
     else:
         return None       
 
     
-# coin data, 本金， 余额， 买入数量
-def sell_coin(data, capital, remainder, quantity):
+# coin data,  余额， 买入数量
+def sell_coin(data, remainder, quantity):
     chain_id = data[0]
     address = data[1]
     coin_id = data[2]
     list_time = data[3]
-    # 持续更新流动性
+    # 持续更新流动性,新币没有流动性
     #liquidity = get_coin_liquidity(chain_id,address)[0]
     #status = get_coin_liquidity(chain_id,address)[1]
     #原价
     start_price = data[6]
+    last_profit = 0 # 上一次利润
+    current_profit = 0 # 当前利润
+    biggest_profit = 0 # 最大利润
+    new_price = get_coin_price(chain_id,address)
+    # 获取当前利润
+    current_profit= (new_price - start_price) / start_price * 100
+    last_profit = current_profit
+    biggest_profit = current_profit
+    print(f"current profit is {current_profit}%")
     # 持续获取价格
     while True:
         new_price = get_coin_price(chain_id,address)
-        if new_price > start_price:
-            # 利润超过5%时卖出
-            if quantity*new_price > capital*1.09:
-                earn_money = new_price*quantity
-                remainder += earn_money
-                print(f"Take Profit!!! Sold {quantity} {coin_id} at {new_price} with ${earn_money} , and remainer is ${remainder}")
-                quantity = 0
-                #返回余额
-                return remainder
-            else:
-                print(f"not buy at [{new_price}]")
-                time.sleep(1)
-        # 当前价格比购入价格低
-        else:
-            # stop loss at 3%
-            if quantity * new_price < capital * 0.97:
-                earn_money = new_price*quantity
-                remainder += earn_money
-                print(f"Stop Loss!!! Sold {quantity} {coin_id} at {new_price} with ${earn_money} , and remainer is ${remainder}")
-                quantity = 0
-                #返回余额
-                return remainder
-            else:
-                print(f"not buy at{new_price}")
-                time.sleep(1)
+        # 获取当前利润
+        current_profit= (new_price - start_price) / start_price * 100
+        
+        if current_profit > last_profit:
+            last_profit = current_profit
+            biggest_profit = current_profit
+            print(f"Current profit is increasing, current profit is {current_profit}%")
+            time.sleep(0.3)
+            continue
+        
+        elif current_profit < last_profit:
+            print(f"Current profit is decreasing, current profit is {current_profit}%")
+            if biggest_profit - current_profit < 3:
+                last_profit = current_profit
+                time.sleep(0.3)
+                continue
 
+            elif biggest_profit - current_profit >= 3:
+                earn_money = new_price*quantity
+                remainder += earn_money
+                print(f"Sold {quantity} {coin_id} at {new_price} with ${earn_money} , and remainer is ${remainder}")
+                quantity = 0
+                #返回余额
+                return remainder
+        else:
+            
+            time.sleep(0.3)
+            continue
 
         """
         # 流动性小于20000时全部卖出
@@ -238,11 +250,11 @@ def sell_coin(data, capital, remainder, quantity):
         """   
 
 
-capital = 10000
+capital = 10000 # 初始资金
 round_id = 1
-money = 10000
+last_round_money = capital
 quantity = 0
-remainder = 0
+remainder = capital
 
 while True:
 
@@ -250,41 +262,43 @@ while True:
     # 获取数据
 
     new_coin_data= get_new_coin_info()
-
+    print(f"new coin data is {new_coin_data}")
     #买入
-    buy = buy_coin(new_coin_data, money, quantity)
+    buy = buy_coin(new_coin_data, remainder, quantity)# return remainder, quantity
 
-    if buy != None:
+    if buy != None: # 成功买入
     # 余额
         remainder = buy[0]
     # 买入数量
         quantity = buy[1]
     #卖出
-        remainder = sell_coin(new_coin_data,money,remainder,quantity)
-        if remainder >= money:
-            profit = (remainder - money) / money * 100
-            money = remainder
-            print(f"{round_id} round, profit is +{profit}%, the remainder is {remainder}")
-        else:
-            profit = ( money - remainder) / money * 100
-            money = remainder
-            print(f"{round_id} round, profit is -{profit}%, the remainder is {remainder}")
+        remainder = sell_coin(new_coin_data,remainder,quantity)
+        # 计算本回合利润
+        
+        profit = (remainder - last_round_money) / last_round_money * 100
+        last_round_money = remainder
+        print(f"{round_id} round, profit is {profit}%, the remainder is {remainder}")
+    
         round_id += 1
 
     else:
         print("not buy")
         continue
-    if money >= capital:
-        total_profit = (money - capital) / capital * 100
-        print(f"total profit is +{total_profit}%, the capital is {capital},the remainder is {money}")
-    else:
-        total_profit = (capital - money) / capital * 100
-        print(f"total profit is -{total_profit}%, the capital is {capital},the remainder is {money}")
+
+    #计算总利润
+    
+    total_profit = (remainder - capital) / capital * 100
+    print(f"total profit is {total_profit}%, the capital is {capital},the remainder is {remainder}")
+    
 
     print("----------------------------------next round------------------------------------------------")
-    # 休眠30秒
-    time.sleep(10)
+    # 休眠10秒
+    time.sleep(5)
 
 
 
     ## stop loss 
+    ## 不断更新当前利润，如果比上一次的利润少3%，则卖出
+    ## check 时间，只有刚刚上市5分钟的才买入
+    # 查看 pump.fun的api能获取哪些数据
+    # 完善stoploss

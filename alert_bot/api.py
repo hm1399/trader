@@ -103,12 +103,11 @@ def get_okx_data(start_time=None, end_time=None, interval="1m", symbol="BTC-USD"
 
 
 #-----------------------------------------------------------------------------------------------------------------------------
-
+#DEXscreener API
 #返回价格
 def get_coin_price(chain_id,token_address):
     # 构建查询的URL，平台和代币名称组合在一起
     chain_id = chain_id.lower()  # 转换为小写
-    print(chain_id,token_address)
     url = f"https://api.dexscreener.com/tokens/v1/{chain_id}/{token_address}"
     try:
         # 发送请求并获取响应
@@ -181,7 +180,6 @@ def get_latest_coin_info():
 # reurn the liquidity and status of the coin
 def get_coin_liquidity(chain_id,token_address):
     chain_id = chain_id.lower()  # 转换为小写
-    print(chain_id,token_address)
     url = f"https://api.dexscreener.com/tokens/v1/{chain_id}/{token_address}"
     try:
         # 发送请求并获取响应
@@ -212,7 +210,9 @@ def get_coin_liquidity(chain_id,token_address):
 
 
             
-
+#-----------------------------------------------------------------------------------------------------------------------------
+# pump.fun API
+# neon neko
 
 
             
