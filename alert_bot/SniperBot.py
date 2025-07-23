@@ -244,9 +244,10 @@ def sell_coin(data, remainder, quantity):
         if current_profit < 0:
             profit_list[2]+=1
             # 超过20次亏损
-            if Loss_time >= 20:
+            if profit_list[2] >= 20:
                 earn_money = new_price*quantity
                 remainder += earn_money
+                print("亏损太多次，直接放弃等待回升")
                 print(f"Sold {quantity} {coin_id} at {new_price} with ${earn_money} , and remainer is ${remainder}")
                 quantity = 0
                 #返回余额
@@ -291,7 +292,6 @@ def sell_coin(data, remainder, quantity):
                 quantity = 0
                 #返回余额
                 return remainder
-
         else:
             time.sleep(0.2)
             continue
