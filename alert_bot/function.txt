@@ -38,7 +38,22 @@ get_coin_price(chain_id,token_address): Get the price of the coin base on the ch
 get_coin_symbol_time(chain_id,token_address): Get the symbol and time of the coin base on the chain_id and token_address from dex api.
 
 get_latest_coin_info(): Get the latest coin information from dex api.
+
+
+
+
     return [chain_id,address,symbol,time]
 
 get_coin_liquidity(chain_id,token_address): Get the liquidity of the coin base on the chain_id and token_address from dex api.
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------
+每个买卖50回
+90% ： 
+
+
 

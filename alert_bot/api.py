@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 import json
 from discord.ui import Select, View
 import discord
+import asyncio
+import websockets
 
 # date to ms
 def datetime_to_millis(dt_str):
@@ -155,6 +157,7 @@ def get_coin_symbol_time(chain_id,token_address):
 
 
 # get the information of the latest coin
+# 这条不一定是最新的，只是从最新的列表里拿了第一个出来
 def get_latest_coin_info():
     url = "https://api.dexscreener.com/token-profiles/latest/v1"
     try:
@@ -212,7 +215,41 @@ def get_coin_liquidity(chain_id,token_address):
             
 #-----------------------------------------------------------------------------------------------------------------------------
 # pump.fun API
-# neon neko
+async def subscribe():
+  uri = "wss://pumpportal.fun/api/data"
+  async with websockets.connect(uri) as websocket:
+      
+      # Subscribing to token creation events
+      payload = {
+          "method": "subscribeNewToken",
+      }
+      await websocket.send(json.dumps(payload))
+
+      # Subscribing to migration events
+      payload = {
+          "method": "subscribeMigration",
+      }
+      await websocket.send(json.dumps(payload))
+
+      # Subscribing to trades made by accounts
+      payload = {
+          "method": "subscribeAccountTrade",
+          "keys": ["AArPXm8JatJiuyEffuC1un2Sc835SULa4uQqDcaGpAjV"]  # array of accounts to watch
+      }
+      await websocket.send(json.dumps(payload))
+
+      # Subscribing to trades on tokens
+      payload = {
+          "method": "subscribeTokenTrade",
+          "keys": ["91WNez8D22NwBssQbkzjy4s2ipFrzpmn5hfvWVe2aY5p"]  # array of token CAs to watch
+      }
+      await websocket.send(json.dumps(payload))
+      
+      async for message in websocket:
+          print(json.loads(message))
+
+# Run the subscribe function
+#asyncio.get_event_loop().run_until_complete(subscribe())
 
 
             

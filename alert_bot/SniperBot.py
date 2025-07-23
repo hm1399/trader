@@ -177,8 +177,16 @@ def buy_coin(data, remainder, quantity):
     #liquidity = data[4]
     #status = data[5]
     price = data[6]
-    if remainder > price:
+
+    # 小于20000 all in
+    if remainder > price and remainder <= 20000:
         quantity = int(remainder/price)
+        remainder -= price*quantity
+        print(f"Bought {quantity} {coin_id} at {price} with ${price*quantity} , and remainder is ${remainder}")
+        return [remainder, quantity]
+    
+    elif remainder > price and remainder > 20000:
+        quantity = int(20000/price)
         remainder -= price*quantity
         print(f"Bought {quantity} {coin_id} at {price} with ${price*quantity} , and remainder is ${remainder}")
         return [remainder, quantity]
@@ -207,22 +215,61 @@ def sell_coin(data, remainder, quantity):
     last_profit = current_profit #0
     biggest_profit = current_profit #0
     print(f"current profit is {current_profit}%")
+
+    #建立一个数组，记录利润和开始时间，如果同一个利润不变超过1分钟，则卖出
+    Loss_time=0 # 持续亏损的次数,连续20次都是负利润，则卖出
+    profit_list = [current_profit,datetime.now(), Loss_time]
+    
     # 持续获取价格
     while True:
         new_price = get_coin_price(chain_id,address)
         # 获取当前利润
         current_profit= (new_price - start_price) / start_price * 100
-        
-        if current_profit > last_profit:
-            print(f"Current profit is increasing, current profit is {current_profit}%")
-            # 大于20%时卖出
-            if current_profit >= 20.0 or current_profit < 0.0:
+        #检查利润是否有变化
+        #如果利润没有变化超过1分钟，卖出
+        if current_profit == profit_list[0]:
+            if (datetime.now() - profit_list[1]).total_seconds() > 60:
+                earn_money = new_price*quantity
+                remainder += earn_money
+                print("the price is not change for 2 minutes, sell the coin")
+                print(f"Sold {quantity} {coin_id} at {new_price} with ${earn_money} , and remainer is ${remainder}")
+                quantity = 0
+                #返回余额
+                return remainder
+        #利润变化了
+        else:
+            profit_list[0]=current_profit
+            profit_list[1]=datetime.now()
+
+        if current_profit < 0:
+            Loss_time += 1
+            # 超过20次亏损
+            if Loss_time >= 20:
                 earn_money = new_price*quantity
                 remainder += earn_money
                 print(f"Sold {quantity} {coin_id} at {new_price} with ${earn_money} , and remainer is ${remainder}")
                 quantity = 0
                 #返回余额
                 return remainder
+        # 中断连续亏损
+        else:
+            Loss_time = 0
+
+        if current_profit > last_profit:
+            print(f"Current profit is increasing, current profit is {current_profit}%")
+            # 大于20%时卖出
+            if current_profit >= 20.0 or ( -5<=current_profit < 0.0):
+                earn_money = new_price*quantity
+                remainder += earn_money
+                print(f"Sold {quantity} {coin_id} at {new_price} with ${earn_money} , and remainer is ${remainder}")
+                quantity = 0
+                #返回余额
+                return remainder
+            elif current_profit <-5.0 :
+                last_profit = current_profit
+                biggest_profit = current_profit
+                time.sleep(0.2)
+                continue
             else:
                 last_profit = current_profit
                 biggest_profit = current_profit
@@ -231,26 +278,21 @@ def sell_coin(data, remainder, quantity):
         
         elif current_profit < last_profit:
             print(f"Current profit is decreasing, current profit is {current_profit}%")
-            if biggest_profit *0.9 <= current_profit:
+            # 亏的少 或者 亏损过大, 等待回升
+            if biggest_profit *0.9 <= current_profit or current_profit < -5.0:
                 last_profit = current_profit
                 time.sleep(0.2)
                 continue
-            # 当前利润比历史最大利润高的9成低或者亏损在5%以下，卖出
-            elif biggest_profit *0.9 > current_profit  or (current_profit < 0.0 and current_profit > -5):
+            # 当前利润亏的不是很多，卖出
+            elif biggest_profit *0.9 > current_profit  and  current_profit > -5:
                 earn_money = new_price*quantity
                 remainder += earn_money
                 print(f"Sold {quantity} {coin_id} at {new_price} with ${earn_money} , and remainer is ${remainder}")
                 quantity = 0
                 #返回余额
                 return remainder
-            # 亏损超过5%，等待盈利，不要亏太多
-            elif current_profit < 0.0 and current_profit > -5:
-                last_profit = current_profit
-                time.sleep(0.2)
-                continue
 
         else:
-            
             time.sleep(0.2)
             continue
 
@@ -271,7 +313,7 @@ round_id = 1
 last_round_money = capital
 quantity = 0
 remainder = capital
-
+print(f"----------------------------------{round_id} round------------------------------------------------")
 while True:
 
 
@@ -307,9 +349,9 @@ while True:
     print(f"total profit is {total_profit}%, the capital is {capital},the remainder is {remainder}")
     
 
-    print(f"----------------------------------{round_id} next round------------------------------------------------")
+    print(f"----------------------------------{round_id} round------------------------------------------------")
     # 休眠10秒
-    time.sleep(5)
+    time.sleep(1)
 
 
 
