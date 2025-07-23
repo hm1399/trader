@@ -278,7 +278,7 @@ def sell_coin(data, remainder, quantity):
         
         elif current_profit < last_profit:
             print(f"Current profit is decreasing, current profit is {current_profit}%")
-            # 到最大利润的9成 或者 亏损过大, 等待回升
+            # 没低过到最大利润的9成 或者 亏损超过5%, 等待回升
             if biggest_profit *0.9 <= current_profit or current_profit < -5.0:
                 last_profit = current_profit
                 time.sleep(0.2)
@@ -351,7 +351,7 @@ while True:
 
     print(f"----------------------------------{round_id} round------------------------------------------------")
     # 休眠10秒
-    time.sleep(5)
+    time.sleep(0.7)
 
 
 
