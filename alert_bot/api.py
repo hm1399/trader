@@ -157,7 +157,6 @@ def get_coin_symbol_time(chain_id,token_address):
 
 
 # get the information of the latest coin
-# 这条不一定是最新的，只是从最新的列表里拿了第一个出来
 def get_latest_coin_info():
     url = "https://api.dexscreener.com/token-profiles/latest/v1"
     try:
@@ -166,13 +165,29 @@ def get_latest_coin_info():
         
         # 如果响应成功
         if response.status_code == 200:
-            data = response.json()  # 将响应内容转换为JSON格式   
-            data=data[0]
-            chain_id=data.get('chainId', 'N/A')
-            address = data.get('tokenAddress', 'N/A')
-            symbol = get_coin_symbol_time(chain_id,address)[0]
-            time = get_coin_symbol_time(chain_id,address)[1]
-            data_set=[chain_id,address,symbol,time]
+            data = response.json()  # 将响应内容转换为JSON格式  
+            latest_chain_id = None
+            latest_address = None
+            latest_symbol = None
+            latest_time = None
+
+            for item in data:
+                chain_id=item.get('chainId', 'N/A')
+                address = item.get('tokenAddress', 'N/A')
+                time = get_coin_symbol_time(chain_id,address)[1]
+                if  latest_time == None:
+                    latest_time = time
+                    latest_chain_id = chain_id
+                    latest_address = address
+                elif time > latest_time :
+                    latest_time = time
+                    latest_chain_id = chain_id
+                    latest_address = address
+                else:
+                    continue
+            
+            latest_symbol = get_coin_symbol_time(latest_chain_id,latest_address)[0]
+            data_set=[latest_chain_id, latest_address, latest_symbol, latest_time]
             return data_set
         else:
             print(f"Error: Unable to fetch data (status code: {response.status_code})")
@@ -252,5 +267,3 @@ async def subscribe():
 #asyncio.get_event_loop().run_until_complete(subscribe())
 
 
-            
-            
