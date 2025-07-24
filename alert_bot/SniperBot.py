@@ -177,7 +177,7 @@ def buy_coin(data, remainder, quantity):
     #liquidity = data[4]
     #status = data[5]
     price = data[6]
-    
+
 
     # 小于20000 all in
     if remainder > price and remainder <= 20000:
@@ -309,50 +309,51 @@ def sell_coin(data, remainder, quantity):
         """   
 
 
-capital = 10000 # 初始资金
-round_id = 1
-last_round_money = capital
-quantity = 0
-remainder = capital
-print(f"----------------------------------{round_id} round------------------------------------------------")
-while True:
-
-
-    # 获取数据
-
-    new_coin_data= get_new_coin_info()
-    print(f"new coin data is {new_coin_data}")
-    #买入
-    buy = buy_coin(new_coin_data, remainder, quantity)# return remainder, quantity
-
-    if buy != None: # 成功买入
-    # 余额
-        remainder = buy[0]
-    # 买入数量
-        quantity = buy[1]
-    #卖出
-        remainder = sell_coin(new_coin_data,remainder,quantity)
-        # 计算本回合利润
-        
-        profit = (remainder - last_round_money) / last_round_money * 100
-        last_round_money = remainder
-        print(f"{round_id} round, profit is {profit}%, the remainder is {remainder}")
-    
-        round_id += 1
-
-    else:
-        print("not buy")
-        continue
-
-    #计算总利润
-    
-    total_profit = (remainder - capital) / capital * 100
-    print(f"total profit is {total_profit}%, the capital is {capital},the remainder is {remainder}")
-    
-
+def start_SniperBotbot(capital=10000):
+    capital = capital # 初始资金
+    round_id = 1
+    last_round_money = capital
+    quantity = 0
+    remainder = capital
     print(f"----------------------------------{round_id} round------------------------------------------------")
-    # 休眠10秒
-    time.sleep(0.7)
+    while True:
+
+
+        # 获取数据
+
+        new_coin_data= get_new_coin_info()
+        print(f"new coin data is {new_coin_data}")
+        #买入
+        buy = buy_coin(new_coin_data, remainder, quantity)# return remainder, quantity
+
+        if buy != None: # 成功买入
+        # 余额
+            remainder = buy[0]
+        # 买入数量
+            quantity = buy[1]
+        #卖出
+            remainder = sell_coin(new_coin_data,remainder,quantity)
+            # 计算本回合利润
+        
+            profit = (remainder - last_round_money) / last_round_money * 100
+            last_round_money = remainder
+            print(f"{round_id} round, profit is {profit}%, the remainder is {remainder}")
+    
+            round_id += 1
+
+        else:
+            print("not buy")
+            continue
+
+        #计算总利润
+    
+        total_profit = (remainder - capital) / capital * 100
+        print(f"total profit is {total_profit}%, the capital is {capital},the remainder is {remainder}")
+    
+
+        print(f"----------------------------------{round_id} round------------------------------------------------")
+        # 休眠10秒
+        time.sleep(0.7)
 
 
 
