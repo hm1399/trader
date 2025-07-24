@@ -229,7 +229,7 @@ def get_coin_liquidity(chain_id,token_address):
 
             
 #-----------------------------------------------------------------------------------------------------------------------------
-# pump.fun API
+# pump.fun API,抄的，还没调试
 async def subscribe():
   uri = "wss://pumpportal.fun/api/data"
   async with websockets.connect(uri) as websocket:
