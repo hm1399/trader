@@ -6,6 +6,9 @@ from discord.ui import Select, View
 import discord
 import asyncio
 import websockets
+import ccxt.pro as ccxtpro
+import ccxt  
+import time
 
 # date to ms
 def datetime_to_millis(dt_str):
@@ -266,4 +269,17 @@ async def subscribe():
 # Run the subscribe function
 #asyncio.get_event_loop().run_until_complete(subscribe())
 
+
+#-----------------------------------------------------------------------------------------------------------------------------
+# ccxt data
+async def get_ccxt_data(symbol: str):
+    exchange = ccxtpro.binance()            # 公共频道，无需 API key
+    try:
+        ticker = await exchange.watch_ticker(symbol)
+        return ticker
+    finally:
+        await exchange.close()
+
+if __name__ == "__main__":
+    latest = asyncio.run(get_latest_coin_info())
 
