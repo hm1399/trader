@@ -177,6 +177,7 @@ def buy_coin(data, remainder, quantity):
     #liquidity = data[4]
     #status = data[5]
     price = data[6]
+    
 
     # 小于20000 all in
     if remainder > price and remainder <= 20000:
