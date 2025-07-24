@@ -67,6 +67,17 @@ get_coin_liquidity(chain_id,token_address): Get the liquidity of the coin base o
 第2次：100回，利润：，
 
 
+{'symbol': 'BTC/USDT', 'timestamp': 1753328298012, 'datetime': '2025-07-24T03:38:18.012Z', 
+'high': 119273.36, 'low': 117301.0, 'bid': 119014.54, 'bidVolume': 11.63198, 'ask': 119014.55, 
+'askVolume': 0.79213, 'vwap': 118229.36444674, 'open': 118860.0, 'close': 119014.54, 'last': 119014.54, 
+'previousClose': 118860.01, 'change': 154.54, 'percentage': 0.13, 'average': 118937.27, 
+'baseVolume': 14317.48828, 'quoteVolume': 1692747539.8180482, 'markPrice': None, 'indexPrice': None, 
+'info': {'symbol': 'BTCUSDT', 'priceChange': '154.54000000', 'priceChangePercent': '0.130', 'weightedAvgPrice': '118229.36444674', 'prevClosePrice': '118860.01000000', 'lastPrice': '119014.54000000', 'lastQty': '0.01400000', 'bidPrice': '119014.54000000', 'bidQty': '11.63198000', 'askPrice': '119014.55000000', 'askQty': '0.79213000', 'openPrice': '118860.00000000', 'highPrice': '119273.36000000', 'lowPrice': '117301.00000000', 'volume': '14317.48828000', 'quoteVolume': '1692747539.81804820', 'openTime': '1753241898012', 'closeTime': '1753328298012', 'firstId': '5106250509', 'lastId': '5108315595', 'count': '2065087'}}
 
-
-
+WebSocket ticker:
+{'symbol': 'BTC/USDT', 'timestamp': 1753328834013, 'datetime': '2025-07-24T03:47:14.013Z', 
+'high': 119273.36, 'low': 117301.0, 'bid': 118738.19, 'bidVolume': 2.41977, 'ask': 118738.2,
+ 'askVolume': 7.30057, 'vwap': 118228.51244928, 'open': 118690.18, 'close': 118738.19, 'last': 118738.19, 
+ 'previousClose': 118690.18, 'change': 48.01, 'percentage': 0.04, 'average': 118714.18,
+  'baseVolume': 14276.39145, 'quoteVolume': 1687876524.2771845, 
+  'info': {'e': '24hrTicker', 'E': 1753328834020, 's': 'BTCUSDT', 'p': '48.01000000', 'P': '0.040', 'w': '118228.51244928', 'x': '118690.18000000', 'c': '118738.19000000', 'Q': '0.01555000', 'b': '118738.19000000', 'B': '2.41977000', 'a': '118738.20000000', 'A': '7.30057000', 'o': '118690.18000000', 'h': '119273.36000000', 'l': '117301.00000000', 'v': '14276.39145000', 'q': '1687876524.27718440', 'O': 1753242434013, 'C': 1753328834013, 'F': 5106261228, 'L': 5108329126, 'n': 2067899}, 'indexPrice': None, 'markPrice': None}

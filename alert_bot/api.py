@@ -283,3 +283,5 @@ async def get_ccxt_data(symbol: str):
 if __name__ == "__main__":
     latest = asyncio.run(get_latest_coin_info())
 
+
+
