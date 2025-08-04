@@ -12,6 +12,8 @@ import ccxt
 import time
 import yfinance as yf
 import re
+from requests import Request, Session
+from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 
 # date to ms
 def datetime_to_millis(dt_str):
@@ -30,6 +32,12 @@ def get_binance_hist(start_time=None, end_time=None, interval="1m", symbol="BTCU
     if not start_time:
         start_time = end_time - timedelta(days=30)
 
+    if isinstance(start_time, str):
+        start_time = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
+    if isinstance(end_time, str):
+        end_time = datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
+
+    print(end_time)
     # API for binance
     url = "https://api.binance.com/api/v3/klines"
 
@@ -38,7 +46,8 @@ def get_binance_hist(start_time=None, end_time=None, interval="1m", symbol="BTCU
         "symbol": symbol, # 交易对符号
         "interval": interval, # 时间间隔：多长时间的k线
         "startTime": int(start_time.timestamp() * 1000), #毫秒时间戳
-        "endTime": int(end_time.timestamp() * 1000)
+        "endTime": int(end_time.timestamp() * 1000),
+        "limit": 1500
     }
 
     # 把请求回来的数据当作 JSON 格式解析，转为 Python 数据结构，并存在data里
@@ -61,10 +70,8 @@ def get_binance_hist(start_time=None, end_time=None, interval="1m", symbol="BTCU
         "taker_buy_base", "taker_buy_quote", "ignore"
     ])
 
-
+    df = df[["open", "high", "low", "close", "volume"]]
     df["close"] = df["close"].astype(float)
-    # 将毫秒的开盘时间转为标准的日期时间格式
-    df["time"] = pd.to_datetime(df["time"], unit="ms")
 
     return df
 
@@ -76,9 +83,9 @@ def get_binance_real(symbol="BTCUSDT"):
     return data
 
 
-#获取交易额排名范围的交易对，24小时涨幅
-#'quoteVolume'
-def get_vol_rank(start:int=1, end:int=10, symbol:str=None):
+#获取排名范围的交易对，24小时的数据
+#type:'quoteVolume','priceChangePercent','volume','lastPrice'
+def get_vol_rank(start:int=1, end:int=10, symbol:str=None,type:str='quoteVolume',rank_range:int=-1):
     url = "https://api.binance.com/api/v3/ticker/24hr"
     response = requests.get(url)
     data = response.json()
@@ -97,10 +104,11 @@ def get_vol_rank(start:int=1, end:int=10, symbol:str=None):
     df = df[(df['lastPrice'] > 0) & (df['quoteVolume'] > 0)]
 
     # 排序（按成交额从高到低）
-    df_sorted = df.sort_values(by='quoteVolume', ascending=False).reset_index(drop=True)
+    df_sorted = df.sort_values(by=type, ascending=False).reset_index(drop=True)
+
     total = len(df_sorted)
     if symbol:
-        matched_symbols = df_sorted[df_sorted['symbol'].str.contains(symbol, case=False, na=False)]
+        matched_symbols = df_sorted[df_sorted['symbol'].str.endswith(symbol,na=False)]
 
         if matched_symbols.empty:
             return f"No symbols found matching '{symbol}' in the market data."
@@ -109,7 +117,9 @@ def get_vol_rank(start:int=1, end:int=10, symbol:str=None):
         for i, row in matched_symbols.iterrows():
             rank = row.name + 1  # 获取排名，name对应的是行的索引
             print(f"The symbol '{row['symbol']}' is ranked #{rank} by 24h quote volume.")
-            symbol_rank.append(rank)
+            if rank_range != -1 :
+                if rank <= rank_range:
+                    symbol_rank.append(row['symbol'])
 
          
     # 支持负数索引
@@ -132,7 +142,7 @@ def get_vol_rank(start:int=1, end:int=10, symbol:str=None):
     # 打印输出
     print(f"\nTrading pairs ranked from {start} to {end} by 24h Quote Volume:\n")
     for i, row in enumerate(subset.itertuples(index=False), 1):
-        data_rank.append(row)
+        data_rank.append(row.symbol)
         print(f"{i}. {row.symbol}:")
         print(f"   - Last Price        : {row.lastPrice}")
         print(f"   - 24h Volume        : {row.volume}")
@@ -140,58 +150,6 @@ def get_vol_rank(start:int=1, end:int=10, symbol:str=None):
         print(f"   - Change Percent    : {row.priceChangePercent}%\n")
 
     return [data_rank, symbol_rank]
-
-
-#'priceChangePercent'
-# 返回以pricechange为排名的交易对信息，24小时涨幅
-def get_change_rank(start:int=0, end:int=10):
-    url = "https://api.binance.com/api/v3/ticker/24hr"
-    response = requests.get(url)
-    data = response.json()
-
-    df = pd.DataFrame(data)
-
-    # 转换字段为 float 类型
-    df['lastPrice'] = pd.to_numeric(df['lastPrice'], errors='coerce')
-    df['volume'] = pd.to_numeric(df['volume'], errors='coerce')
-    df['quoteVolume'] = pd.to_numeric(df['quoteVolume'], errors='coerce')
-    df['priceChangePercent'] = pd.to_numeric(df['priceChangePercent'], errors='coerce')
-
-    # 过滤掉价格和成交额为 0 的数据
-    df = df[(df['lastPrice'] > 0) & (df['quoteVolume'] > 0)]
-
-    # 排序（按成交额从高到低）
-    df_sorted = df.sort_values(by='priceChangePercent', ascending=False).reset_index(drop=True)
-
-    total = len(df_sorted)
-
-    # 支持负数索引
-    if start < 0 and end < 0:
-        re_start = total + start
-        re_end = total + end
-        # 确保从较小索引切到较大索引
-        re_start, re_end = sorted([re_start, re_end])
-        subset = df_sorted.iloc[re_start:re_end][::-1]
-
-    elif start >= 0 and end >= 0:
-        re_start, re_end = sorted([start, end])
-        subset = df_sorted.iloc[re_start:re_end]
-
-    else:
-        return "Invalid input: Please input either two positive integers or two negative integers."
-
-    # 打印输出
-    print(f"\nTrading pairs ranked from {start} to {end} by 24h Quote Volume:\n")
-    for i, row in enumerate(subset.itertuples(index=False), 1):
-        print(f"{i+1}. {row.symbol}:")
-        print(f"   - Last Price        : {row.lastPrice}")
-        print(f"   - 24h Volume        : {row.volume}")
-        print(f"   - 24h Quote Volume  : {row.quoteVolume}")
-        print(f"   - Change Percent    : {row.priceChangePercent}%\n")
-
-    return subset
-
-
 
 
 
@@ -420,7 +378,7 @@ def get_pair_name(exchange_name: str) -> list:
     pair_list = list(markets.keys())
     return pair_list
 
-
+# 资金费率
 def get_funding_rate(exchange_name: str, symbol: str):
     exchange_name = exchange_name.lower()  # 转换为小写
     symbol = symbol.upper()  # 转换为大写
@@ -577,6 +535,7 @@ def get_volatility(period: str, exchange: str, symbol: str):
         unit_minutes = 60*24*7
 
     ohlcv = this_exchange.fetch_ohlcv(symbol.upper(), timeframe=timeframe, since=since, limit=1000)
+    print(ohlcv)
     df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['log_return'] = np.log(df['close'] / df['close'].shift(1))
     df.dropna(inplace=True)
@@ -623,3 +582,134 @@ def get_jup_data(address:str):
         print(f"Error: Unable to fetch data (status code: {response.status_code})")
     
     return dataset
+
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# coingecko API
+
+# Helius
+# sniperoo
+
+# crypto rank
+
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Birdeye
+# "liquidity","volume24hUSD","rank"
+def get_bds_rank(type:str="rank"):
+    url = f"https://public-api.birdeye.so/defi/token_trending?sort_by={type}&sort_type=asc&offset=0&limit=1000"
+
+    headers = {
+        'x-api-key': "e9d1fcf1e4b241f6b49e4fc19912c220",
+        "accept": "application/json",
+        "x-chain": "solana"
+    }
+
+    response = requests.get(url, headers=headers)
+    # 确保响应是成功的
+    if response.status_code == 200:
+        # 获取返回的 JSON 数据
+        data = response.json()
+        
+        # 提取并输出所需的字段
+        for token in data.get("data", {}).get("tokens", []):
+            rank = token.get('rank')
+            symbol = token.get('symbol')
+            liquidity = token.get('liquidity')
+            volume24hUSD = token.get('volume24hUSD')
+            volume24hChangePercent = token.get('volume24hChangePercent')
+            
+            # 打印每个代币的相关信息
+            print(f"Rank: {rank}, Symbol: {symbol}, Liquidity: {liquidity}, Volume (24h): {volume24hUSD}, 24h Volume Change: {volume24hChangePercent}%")
+    else:
+        print(f"Request failed with status code {response.status_code}")
+    
+    return data
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------
+# CoinMarketCap
+
+
+def get_cmc_rank(symbol:str):
+    url = 'https://sandbox-api.coinmarketcap.com/v1/cryptocurrency/listings/latest'
+    parameters = {
+    'start':'1',
+    'limit':'200',
+    'convert':'USD'
+    }
+    headers = {
+    'Accepts': 'application/json',
+    'X-CMC_PRO_API_KEY': '904d1025-e997-4807-8ef2-9db2cce8066e',
+    }
+
+    session = Session()
+    session.headers.update(headers)
+
+    try:
+        response = session.get(url, params=parameters)
+        data = json.loads(response.text)
+        print(data)
+    except (ConnectionError, Timeout, TooManyRedirects) as e:
+        print(e)
+
+
+#-----------------------------------------------------------------------------------------------------------
+#sosovalue api
+# API：SOSO-ac8207b9864d434f8b4fe9de6b24020b
+# return pair_list
+def get_soso_pair():
+    url = 'https://openapi.sosovalue.com/openapi/v1/data/default/coin/list'
+    headers = {
+    'Accepts': 'application/json',
+    'x-soso-api-key': 'SOSO-ac8207b9864d434f8b4fe9de6b24020b',
+    }
+
+    response = requests.post(url, headers=headers)
+    if response.status_code == 200:
+        # 获取返回的 JSON 数据
+        data = response.json()
+        data_set=[]
+        # 提取并输出所需的字段
+        for token in data.get("data", {}):
+            id = token.get('currencyId') 
+            symbol = token.get('currencyName').upper()   
+            full_name = token.get('fullName')
+            data_set.append([id,symbol,full_name])
+            
+            # 打印每个代币的相关信息
+            print(f"Symbol: {symbol}, ID: {id}, fullname: {full_name}")
+    else:
+        print(f"Request failed with status code {response.status_code}")
+    df = pd.DataFrame(data_set, columns=['id','symbol','full_name'])
+    return df
+
+
+
+def get_pair_id(symbol:str):
+    df = pd.read_csv("soso_pair.csv")
+    matched_symbols = df[df['symbol']=="PUMP"]
+    if len(matched_symbols) == 0:
+        return None
+    id = matched_symbols['id'].values[0]
+    return id
+
+    
+def get_soso_news(symbol,pageNum=1,pageSize=100):
+    id = get_pair_id(symbol)
+    print(id)
+    if id == None:
+        print("Symbol not found.")
+        return None
+    url = f'https://openapi.sosovalue.com/api/v1/news/featured/currency?currencyId={id}&pageNum={pageNum}&pageSize={pageSize}'
+    headers = {
+    'Accepts': 'application/json',
+    'x-soso-api-key': 'SOSO-ac8207b9864d434f8b4fe9de6b24020b'
+    }
+
+    response = requests.get(url, headers=headers)
+    
+    data = response.json()
+        
+    return data
+
+
+#def get_soso_etf_latest(symbol):
